@@ -15,7 +15,7 @@
 #         S3Bucket: lmduc-artifact-ec2-31-03-2025
 #         S3Key: !Ref PathS3
 #       Role: !GetAtt MyLambdaRole.Arn
-  
+
 #   MyLambdaRole:
 #     Type: AWS::IAM::Role
 #     Properties:
@@ -32,7 +32,7 @@
 #             Version: "2012-10-17"
 #             Statement:
 #               - Effect: Allow
-#                 Action: 
+#                 Action:
 #                   - logs:CreateLogGroup
 #                   - logs:PutLogEvents
 #                   - s3:GetObject
@@ -51,9 +51,9 @@ Parameters:
 
 Mappings:
   S3BucketMapping:
-    ap-northeast-1:  # Tokyo
+    ap-northeast-1: # Tokyo
       BucketName: lmduc-artifact-ec2-31-03-2025
-    ap-southeast-1:       # N. Virginia
+    ap-southeast-1: # N. Virginia
       BucketName: lmduc-artifact-ap-southeast-4-1-2024
 
 Resources:
@@ -67,7 +67,7 @@ Resources:
         S3Bucket: !FindInMap [S3BucketMapping, !Ref "AWS::Region", BucketName]
         S3Key: !Ref PathS3
       Role: !GetAtt MyLambdaRole.Arn
-  
+
   MyLambdaRole:
     Type: AWS::IAM::Role
     Properties:
@@ -84,7 +84,7 @@ Resources:
             Version: "2012-10-17"
             Statement:
               - Effect: Allow
-                Action: 
+                Action:
                   - logs:CreateLogGroup
                   - logs:PutLogEvents
                 Resource: "*"
@@ -92,9 +92,7 @@ Resources:
                 Action:
                   - s3:GetObject
                   - s3:ListBucket
-                Resource:
-                  - !Sub arn:aws:s3:::${!FindInMap [S3BucketMapping, !Ref "AWS::Region", BucketName]}
-                  - !Sub arn:aws:s3:::${!FindInMap [S3BucketMapping, !Ref "AWS::Region", BucketName]}/*
+                Resource: "*"
 
 Outputs:
   LambdaFunctionArn:
