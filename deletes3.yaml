@@ -31,7 +31,7 @@ Resources:
                   - !GetAtt MyS3Bucket.Arn
                   - !Sub "${MyS3Bucket.Arn}/*"
 
-  # ✅ 3. Tạo Lambda Function để xóa objects trong S3 bucket
+  # ✅ 3. Tạo Lambda Function để xóa objects trong S3 buckett
   DeleteS3ObjectsLambda:
     Type: AWS::Lambda::Function
     Properties:
