@@ -1,4 +1,9 @@
 AWSTemplateFormatVersion: "2010-09-09"
+Parameters:
+  PathS3:
+    Description: Path code lambda Function
+    Type: String
+    Default: lambda-1.zip
 Resources:
   LmducLambdaFunction:
     Type: AWS::Lambda::Function
@@ -8,7 +13,7 @@ Resources:
       Handler: index.lambda_handler
       Code:
         S3Bucket: lmduc-artifact-ec2-31-03-2025
-        S3Key: lambda.zip 
+        S3Key: !Ref PathS3
       Role: !GetAtt MyLambdaRole.Arn
   
   MyLambdaRole:
