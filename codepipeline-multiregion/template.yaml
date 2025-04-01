@@ -1,9 +1,61 @@
+# AWSTemplateFormatVersion: "2010-09-09"
+# Parameters:
+#   PathS3:
+#     Description: Path code lambda Function
+#     Type: String
+#     Default: lambda-1.zip
+# Resources:
+#   LmducLambdaFunction:
+#     Type: AWS::Lambda::Function
+#     Properties:
+#       FunctionName: Deploy-Lambda-Multi-Region
+#       Runtime: python3.12
+#       Handler: index.lambda_handler
+#       Code:
+#         S3Bucket: lmduc-artifact-ec2-31-03-2025
+#         S3Key: !Ref PathS3
+#       Role: !GetAtt MyLambdaRole.Arn
+  
+#   MyLambdaRole:
+#     Type: AWS::IAM::Role
+#     Properties:
+#       AssumeRolePolicyDocument:
+#         Version: "2012-10-17"
+#         Statement:
+#           - Effect: Allow
+#             Principal:
+#               Service: lambda.amazonaws.com
+#             Action: sts:AssumeRole
+#       Policies:
+#         - PolicyName: LambdaBasicExecution
+#           PolicyDocument:
+#             Version: "2012-10-17"
+#             Statement:
+#               - Effect: Allow
+#                 Action: 
+#                   - logs:CreateLogGroup
+#                   - logs:PutLogEvents
+#                   - s3:GetObject
+#                   - s3:ListBucket
+#                 Resource: "*"
+# Outputs:
+#   LambdaFunctionArn:
+#     Value: !GetAtt LmducLambdaFunction.Arn
+
 AWSTemplateFormatVersion: "2010-09-09"
 Parameters:
   PathS3:
     Description: Path code lambda Function
     Type: String
     Default: lambda-1.zip
+
+Mappings:
+  S3BucketMapping:
+    ap-northeast-1:  # Tokyo
+      BucketName: lmduc-artifact-ec2-31-03-2025
+    ap-southeast-1:       # N. Virginia
+      BucketName: lmduc-artifact-ap-southeast-4-1-2024
+
 Resources:
   LmducLambdaFunction:
     Type: AWS::Lambda::Function
@@ -12,7 +64,7 @@ Resources:
       Runtime: python3.12
       Handler: index.lambda_handler
       Code:
-        S3Bucket: lmduc-artifact-ec2-31-03-2025
+        S3Bucket: !FindInMap [S3BucketMapping, !Ref "AWS::Region", BucketName]
         S3Key: !Ref PathS3
       Role: !GetAtt MyLambdaRole.Arn
   
@@ -35,9 +87,15 @@ Resources:
                 Action: 
                   - logs:CreateLogGroup
                   - logs:PutLogEvents
+                Resource: "*"
+              - Effect: Allow
+                Action:
                   - s3:GetObject
                   - s3:ListBucket
-                Resource: "*"
+                Resource:
+                  - !Sub arn:aws:s3:::${!FindInMap [S3BucketMapping, !Ref "AWS::Region", BucketName]}
+                  - !Sub arn:aws:s3:::${!FindInMap [S3BucketMapping, !Ref "AWS::Region", BucketName]}/*
+
 Outputs:
   LambdaFunctionArn:
     Value: !GetAtt LmducLambdaFunction.Arn
