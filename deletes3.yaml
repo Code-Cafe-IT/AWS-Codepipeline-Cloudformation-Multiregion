@@ -1,0 +1,68 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  # ✅ 1. Tạo S3 Bucket
+  MyS3Bucket:
+    Type: AWS::S3::Bucket
+    DeletionPolicy: Retain # Giữ lại bucket nếu không có Lambda function
+    Properties:
+      BucketName: !Sub my-cloudformation-bucket-${AWS::AccountId}
+
+  # ✅ 2. Tạo IAM Role cho Lambda function (cho phép xóa objects trong S3)
+  LambdaExecutionRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: sts:AssumeRole
+      Policies:
+        - PolicyName: DeleteS3ObjectsPolicy
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action:
+                  - s3:ListBucket
+                  - s3:DeleteObject
+                Resource:
+                  - !GetAtt MyS3Bucket.Arn
+                  - !Sub "${MyS3Bucket.Arn}/*"
+
+  # ✅ 3. Tạo Lambda Function để xóa objects trong S3 bucket
+  DeleteS3ObjectsLambda:
+    Type: AWS::Lambda::Function
+    Properties:
+      Handler: index.lambda_handler
+      Runtime: python3.9
+      Role: !GetAtt LambdaExecutionRole.Arn
+      Code:
+        ZipFile: |
+          import boto3
+          import cfnresponse
+          def lambda_handler(event, context):
+              s3 = boto3.resource('s3')
+              bucket_name = event['ResourceProperties']['BucketName']
+              try:
+                  bucket = s3.Bucket(bucket_name)
+                  bucket.objects.all().delete()  # Xóa toàn bộ objects trong bucket
+                  responseData = {"Message": "All objects deleted successfully"}
+                  cfnresponse.send(event, context, cfnresponse.SUCCESS, responseData)
+              except Exception as e:
+                  responseData = {"Error": str(e)}
+                  cfnresponse.send(event, context, cfnresponse.FAILED, responseData)
+
+  # ✅ 4. Custom Resource gọi Lambda function khi stack bị delete
+  CustomDeleteS3Objects:
+    Type: Custom::DeleteS3Objects
+    Properties:
+      ServiceToken: !GetAtt DeleteS3ObjectsLambda.Arn
+      BucketName: !Ref MyS3Bucket
+Outputs:
+  S3BucketName: 
+    Description: 
+    Value: !Ref MyS3Bucket
+    Export:
+      Name: !Sub "${AWS::StackName}-S3BucketName"

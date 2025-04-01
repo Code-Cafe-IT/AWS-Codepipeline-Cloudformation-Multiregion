@@ -1,0 +1,16 @@
+version: 0.2
+
+phases:
+  install:
+    runtime-versions:
+      python: 3.12
+    commands:
+      - pip install --upgrade awscli
+  build:
+    commands:
+      - aws cloudformation package --template template.yaml --s3-bucket lmduc-artifact-ec2-31-03-2025 --output-template-file packaged-ap-northeast-1.yaml
+      # - aws cloudformation package --template template.yaml --s3-bucket my-artifact-bucket-ap-southeast-1 --output-template-file packaged-ap-southeast-1.yaml
+artifacts:
+  files:
+    - packaged-ap-northeast-1.yaml
+    # - packaged-ap-southeast-1.yaml
