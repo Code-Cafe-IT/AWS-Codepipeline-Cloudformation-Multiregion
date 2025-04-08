@@ -15,7 +15,7 @@ artifacts:
   files:
     - packaged-ap-northeast-1.yaml
     - packaged-ap-southeast-1.yaml
-  name: BuildArtifact   # ← khớp với Pipeline
+  name: BuildArtifact
   secondary-artifacts:
     SecondaryArtifact:
       files:
