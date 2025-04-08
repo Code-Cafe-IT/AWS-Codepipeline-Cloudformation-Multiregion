@@ -17,6 +17,6 @@ artifacts:
     - packaged-ap-southeast-1.yaml
   name: BuildArtifact
   secondary-artifacts:
-    SecondaryArtifact:
+    artifact-test-aws:
       files:
         - packaged-ap-southeast-1.yaml
