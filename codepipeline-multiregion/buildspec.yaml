@@ -14,4 +14,9 @@ phases:
 artifacts:
   files:
     - packaged-ap-northeast-1.yaml
-    - packaged-ap-southeast-1.yaml
+  name: main-artifact
+
+secondary-artifacts:
+  southeast:
+    files:
+      - packaged-ap-southeast-1.yaml
